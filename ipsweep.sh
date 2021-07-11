@@ -1,5 +1,7 @@
 #!/bin/bash
 
+declare -a network_list
+
 trap ctrl_c 2
 
 ctrl_c(){
@@ -18,18 +20,24 @@ fi
 
 # Check interface
 if /usr/sbin/ifconfig "$iface" &>/dev/null; then
-	ip=$(/usr/sbin/ifconfig "$iface" | grep "inet\s" | awk '{printf $2}')
-	red="${ip%.*}"
+	networks=($(ip route | grep "$iface" | cut -d" " -f1 | cut -d"/" -f1 | cut -d"." -f-3))
+	for net in "${networks[@]}"; do
+		[ "$net" != "default" ] && network_list+=("$net")
+	done
 else
 	echo -en "\n\t[!]Error: interface not found!\n"
 	exit 3
 fi
 
 tput civis
-for x in {1..255}; do
-	timeout 1 ping -c 1 "${red}.$x" &>/dev/null && echo -en "\t[+]Host discovered ${red}.$x\n" &
-done; wait
+echo -en "\t[*] ${#network_list[@]} network(s) found\n"
+for net in "${network_list[@]}"; do
+	echo -en "\n\t[*] Scanning $net.0 network...\n"
+	for x in {1..255}; do
+		timeout 1 ping -c 1 "${net}.$x" &>/dev/null && echo -en "\t\t[+] Host discovered ${net}.$x\n" &
+	done; wait
+done
 
 
-echo -en "\tScan Completed!\n"
+echo -en "\n\t[!] Scan Completed!\n\n"
 tput cnorm

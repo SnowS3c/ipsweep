@@ -32,7 +32,7 @@ fi
 tput civis
 echo -en "\t[*] ${#network_list[@]} network(s) found\n"
 for net in "${network_list[@]}"; do
-	echo -en "\n\t[*] Scanning $net.0 network...\n"
+	echo -en "\n\t[*] Scanning $net.0/24 network...\n"
 	for x in {1..255}; do
 		timeout 1 ping -c 1 "${net}.$x" &>/dev/null && echo -en "\t\t[+] Host discovered ${net}.$x\n" &
 	done; wait

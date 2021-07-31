@@ -19,8 +19,8 @@ else
 fi
 
 # Check interface
-if /usr/sbin/ifconfig "$iface" &>/dev/null; then
-	networks=($(ip route | grep "$iface" | cut -d" " -f1 | cut -d"/" -f1 | cut -d"." -f-3))
+if /usr/sbin/ip a show "$iface" &>/dev/null; then
+	networks=($(/usr/sbin/ip route | grep "$iface" | cut -d" " -f1 | cut -d"/" -f1 | cut -d"." -f-3))
 	for net in "${networks[@]}"; do
 		[ "$net" != "default" ] && network_list+=("$net")
 	done
